@@ -1,21 +1,28 @@
 # Práctica 04 — Desplegar un recurso real y medir su coste en Azure
 
 **Alumno:** hectormtudela06
-**Región:** West Europe
 **Resource Group:** `rg-practica04-vm-hectormtudela`
 **Fecha de inicio:** 22/09/2026
+**Región final de la VM:** Spain Central *(ver Sección 6 — no fue una elección libre, sino el resultado de varias restricciones reales de la suscripción)*
 
 ---
 
 ## Sección 3 — Estimación de coste (Pricing Calculator)
 
-![Pricing Calculator](screenshots/dia1/01-pricing-calculator-escenarios.png)
+![Pricing Calculator - VM](screenshots/dia1/01a-pricing-vm.png)
+![Pricing Calculator - Disco](screenshots/dia1/01b-pricing-disco.png)
+![Pricing Calculator - IP y total](screenshots/dia1/01c-pricing-ip-total.png)
 
 | Escenario | Horas de cómputo | Coste cómputo | Coste disco (72 h) | Coste IP (72 h) | Total estimado |
 |---|---|---|---|---|---|
-| A. VM encendida todo el laboratorio | 72 | | | | |
-| B. VM con apagado automático nocturno (~12 h/día) | 36 | | | | |
-| C. VM encendida solo 8 h en total | 8 | | | | |
+| A. VM encendida todo el laboratorio | 72 | 2,95 € | 0,22 € | 0,31 € | **3,48 €** |
+| B. VM con apagado automático nocturno (~12 h/día) | 36 | 1,48 € | 0,22 € | 0,31 € | **2,01 €** |
+| C. VM encendida solo 8 h en total | 8 | 0,33 € | 0,22 € | 0,31 € | **0,86 €** |
+
+**Datos base (Austria East, en euros):**
+- VM B2s: 0,041 €/hora
+- Disco Standard SSD 32GB: 2,23 €/mes → 0,22 € a 72h
+- IP pública Standard estática: 3,13 €/mes → 0,31 € a 72h
 
 ---
 
@@ -28,7 +35,7 @@
 | Project | Practica04 |
 | Department | Data |
 | Environment | Lab |
-| Owner | az01 |
+| Owner | hectormtudela06 |
 | CostCenter | DataNova-Analytics |
 
 ---
@@ -40,16 +47,16 @@
 
 | Campo | Valor |
 |---|---|
-| Name | `Budget-Practica04-VM-az01` |
-| Amount | _(Escenario B redondeado)_ |
+| Name | `Budget-Practica04-VM-hectormtudela` |
+| Amount | 3 € (Escenario B: 2,01 € redondeado) |
 | Reset period | Monthly |
 
 | Tipo | Umbral | Importe | Qué significa |
 |---|---|---|---|
-| Actual | 50 % | | Se ha gastado la mitad de lo previsto |
-| Actual | 80 % | | El laboratorio se acerca al límite |
-| Actual | 100 % | | Se ha alcanzado lo estimado |
-| Forecasted | 100 % | | Azure prevé que el mes superará el Budget |
+| Actual | 50 % | 1,5 € | Se ha gastado la mitad de lo previsto |
+| Actual | 80 % | 2,4 € | El laboratorio se acerca al límite |
+| Actual | 100 % | 3 € | Se ha alcanzado lo estimado |
+| Forecasted | 100 % | 3 € | Azure prevé que el mes superará el Budget |
 
 **Predicción (antes del Día 2):** _(escribe aquí si crees que se activará la alerta Forecasted)_
 
@@ -57,17 +64,49 @@
 
 ## Sección 6 — Despliegue de la máquina virtual
 
-![VM - Basics](screenshots/dia1/05-vm-basics.png)
-![VM - Disks](screenshots/dia1/06-vm-disks.png)
-![VM - Management (Auto-shutdown)](screenshots/dia1/07-vm-management-autoshutdown.png)
-![VM - Tags](screenshots/dia1/08-vm-tags.png)
-![VM - Review + create](screenshots/dia1/09-vm-review-create.png)
+### 6.1 — Configuración final
 
 | Dato | Valor |
 |---|---|
-| Precio por hora mostrado por el portal | |
-| Precio por hora según tu estimación | |
-| Fecha y hora de creación | |
+| Región final | **Spain Central** |
+| Tamaño final | **Standard_B2s_v2** (2 vCPU, 8 GiB RAM) — sustituto de `B2s`, ver 6.2 |
+| Precio por hora (estimado, B2s en Austria East) | 0,041 €/hora |
+| Precio real (B2s_v2, Pricing Calculator en Spain Central) | *(pendiente — consultar calculador)* |
+| Fecha y hora de creación | 22/09/2026, 20:38 UTC |
+| Método de despliegue | **Azure CLI (Cloud Shell)**, tras fallos repetidos del asistente gráfico del portal |
+| Apagado automático | No configurado — indicación del profesor por fallo conocido de la plataforma en esta práctica |
+| Disco del SO | Standard SSD, eliminar con VM ✅ |
+| Puertos de entrada | Ninguno |
+
+### 6.2 — Diario de incidencias (importante para el informe)
+
+Esta sección documenta por qué la configuración final difiere de la especificada originalmente por la práctica (`Standard_B2s` en una región europea cualquiera), y sirve como evidencia de resolución de problemas reales de plataforma:
+
+1. **Región `Austria East` no aparece en el selector del asistente** → sustituida por `West Europe`.
+2. **`West Europe` bloqueada por política de la suscripción** (error `RequestDisallowedByAzure` en "Revisar y crear", afectando a todos los recursos: VM, disco, IP, NIC, NSG, VNet).
+3. **Consulta a Azure Policy → Assignments → "Allowed resource deployment regions"**: la suscripción `Azure for Students` solo permite desplegar en 5 regiones exactas: `germanywestcentral`, `belgiumcentral`, `spaincentral`, `italynorth`, `francecentral`. Estas no coinciden con las que el asistente gráfico ofrece como "Recomendado", lo que causó varios intentos fallidos previos.
+4. **`France Central` sí está permitida, pero el tamaño `B2s` (y toda la serie B) aparece como "Tamaño no disponible"** ahí.
+5. **Consulta a Suscripción → Uso y cuotas**, filtrando por `Microsoft.Compute` y familia `BS`: se confirma que la familia **`Bsv2`** tiene cuota disponible (10 vCPUs, 0% de uso) en **Spain Central**, mientras que otras combinaciones región/familia devuelven error al consultarlas.
+6. **Se despliega la VM con Azure CLI** (`az vm create`) en `spaincentral` con `Standard_B2s`: falla con **`SkuNotAvailable` por restricción de capacidad** (no de política — Azure confirma que la región está permitida, pero no hay capacidad física de ese tamaño en ese momento).
+7. **Se repite el comando sustituyendo el tamaño por `Standard_B2s_v2`** (misma familia B, 2 vCPU, más RAM): **despliegue correcto**, confirmado en el Registro de actividad del Resource Group (`Create or Update Virtual Machine — Correcto`).
+8. **Apagado automático por CLI (`az vm auto-shutdown`) también falla** con el mismo error de política (`RequestDisallowedByAzure`), porque ese comando usa por defecto la región del *Resource Group* (creado originalmente en Austria East) en vez de la región real de la VM. El profesor indica que esta función tiene un fallo conocido en la práctica y que no es necesario configurarla.
+
+**Conclusión:** la sustitución de `B2s` por `B2s_v2` y el cambio de región de Austria East a Spain Central están justificados por restricciones reales, verificables y documentadas de la suscripción — no por elección arbitraria. Esta diferencia se recoge en la comparación estimado vs. real de la Sección 10.
+
+### 6.3 — Capturas a guardar en `screenshots/dia1/`
+
+| # | Nombre de archivo sugerido | Qué debe mostrar |
+|---|---|---|
+| 1 | `06a-wizard-basics-warning-tamano.png` | Aviso inicial de tamaño no disponible en el asistente clásico (Datos básicos) |
+| 2 | `06b-wizard-size-picker-westeurope.png` | Selector de tamaños en West Europe mostrando B2s bloqueado y B2s_v2 disponible |
+| 3 | `06c-review-create-errores-westeurope.png` | Pantalla de "Revisar y crear" con los errores `RequestDisallowedByAzure` en West Europe |
+| 4 | `06d-policy-allowed-regions.png` | Azure Policy → Assignments → "Allowed resource deployment regions" con la lista de 5 regiones permitidas |
+| 5 | `06e-quotas-bs-family.png` | Suscripción → Uso y cuotas, filtrado por familia BS/Bsv2, mostrando cuota 10 en Spain Central |
+| 6 | `06f-cli-error-skunotavailable.png` (o `.txt`) | Salida de terminal del error `SkuNotAvailable` al crear con B2s en Spain Central |
+| 7 | `06g-vm-creada-overview.png` | Página de la VM ya creada: Spain Central, Standard B2s v2, En ejecución, IP pública, tags |
+| 8 | `06h-activity-log.png` | Registro de actividad del Resource Group mostrando "Create Deployment — Error" seguido de "Create or Update Virtual Machine — Correcto" |
+
+*(Las capturas de la pestaña Redes, Administración y Etiquetas del asistente que ya hiciste durante el proceso también puedes incluirlas como `06i`, `06j`, `06k` si quieres más detalle, aunque no son imprescindibles ya que el resultado final se ve en la #7.)*
 
 ---
 
@@ -75,7 +114,7 @@
 
 | Recurso | Tipo | ¿Tiene los 5 Tags? | ¿Genera coste? |
 |---|---|---|---|
-| vm-practica04-az01 | Virtual machine | | |
+| vm-practica04-hectormtudela | Virtual machine | | |
 | | Disk | | |
 | | Public IP address | | |
 | | Network interface | | |
@@ -85,6 +124,8 @@
 ---
 
 ## Sección 8 — Primera revisión en Cost Analysis (Día 2)
+
+**Primera comprobación (23/09/2026, mañana):** Coste real acumulado = **0,01 €**. Previsión ("Forecast") todavía no disponible por falta de histórico suficiente — es normal, según la práctica los datos de coste tardan entre 8 y 24 horas en consolidarse. Se repetirá la comprobación más avanzado el día.
 
 ![Cost Analysis - Resources](screenshots/dia2/10-cost-analysis-resources.png)
 
@@ -175,7 +216,7 @@
 | Elemento | Resultado |
 |---|---|
 | Nombre de la práctica | Práctica 04 — VM Linux con control de costes |
-| Resource Group | rg-practica04-vm-az01 |
+| Resource Group | rg-practica04-vm-hectormtudela |
 | Servicios utilizados | |
 | Coste estimado antes de desplegar | |
 | Budget disponible | |
