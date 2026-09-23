@@ -9,9 +9,12 @@
 
 ## Sección 3 — Estimación de coste (Pricing Calculator)
 
-![Pricing Calculator - VM](screenshots/dia1/01a-pricing-vm.png)
-![Pricing Calculator - Disco](screenshots/dia1/01b-pricing-disco.png)
-![Pricing Calculator - IP y total](screenshots/dia1/01c-pricing-ip-total.png)
+![Pricing Calculator - VM (corrección de instancia)](screenshots/01-pricing-vm-instancia-incorrecta-B2als.png)
+![Pricing Calculator - VM B2s](screenshots/02-pricing-vm-b2s-usd.png)
+![Pricing Calculator - Disco](screenshots/03-pricing-disco-usd.png)
+![Pricing Calculator - IP](screenshots/05-pricing-ip-cantidad1-usd.png)
+![Pricing Calculator - Conversión a EUR](screenshots/06-pricing-eur-conversion-total.png)
+![Pricing Calculator - VM final en EUR](screenshots/07-pricing-vm-final-eur.png)
 
 | Escenario | Horas de cómputo | Coste cómputo | Coste disco (72 h) | Coste IP (72 h) | Total estimado |
 |---|---|---|---|---|---|
@@ -28,7 +31,7 @@
 
 ## Sección 4 — Resource Group etiquetado
 
-![Resource Group con Tags](screenshots/dia1/02-resource-group-tags.png)
+![Resource Group con Tags - Revisar y crear](screenshots/09-resource-group-review-create.png)
 
 | Tag | Valor |
 |---|---|
@@ -42,8 +45,9 @@
 
 ## Sección 5 — Budget del laboratorio
 
-![Configuración del Budget](screenshots/dia1/03-budget-config.png)
-![Alertas del Budget](screenshots/dia1/04-budget-alertas.png)
+![Cost Management - Scope correcto (Resource Group)](screenshots/11-costmanagement-scope-correcto.png)
+![Configuración del Budget](screenshots/12-budget-crear-datos.png)
+![Alertas del Budget completas](screenshots/14-budget-alertas-completas.png)
 
 | Campo | Valor |
 |---|---|
@@ -93,20 +97,27 @@ Esta sección documenta por qué la configuración final difiere de la especific
 
 **Conclusión:** la sustitución de `B2s` por `B2s_v2` y el cambio de región de Austria East a Spain Central están justificados por restricciones reales, verificables y documentadas de la suscripción — no por elección arbitraria. Esta diferencia se recoge en la comparación estimado vs. real de la Sección 10.
 
-### 6.3 — Capturas a guardar en `screenshots/dia1/`
+### 6.3 — Capturas del proceso (en orden cronológico)
 
-| # | Nombre de archivo sugerido | Qué debe mostrar |
-|---|---|---|
-| 1 | `06a-wizard-basics-warning-tamano.png` | Aviso inicial de tamaño no disponible en el asistente clásico (Datos básicos) |
-| 2 | `06b-wizard-size-picker-westeurope.png` | Selector de tamaños en West Europe mostrando B2s bloqueado y B2s_v2 disponible |
-| 3 | `06c-review-create-errores-westeurope.png` | Pantalla de "Revisar y crear" con los errores `RequestDisallowedByAzure` en West Europe |
-| 4 | `06d-policy-allowed-regions.png` | Azure Policy → Assignments → "Allowed resource deployment regions" con la lista de 5 regiones permitidas |
-| 5 | `06e-quotas-bs-family.png` | Suscripción → Uso y cuotas, filtrado por familia BS/Bsv2, mostrando cuota 10 en Spain Central |
-| 6 | `06f-cli-error-skunotavailable.png` (o `.txt`) | Salida de terminal del error `SkuNotAvailable` al crear con B2s en Spain Central |
-| 7 | `06g-vm-creada-overview.png` | Página de la VM ya creada: Spain Central, Standard B2s v2, En ejecución, IP pública, tags |
-| 8 | `06h-activity-log.png` | Registro de actividad del Resource Group mostrando "Create Deployment — Error" seguido de "Create or Update Virtual Machine — Correcto" |
-
-*(Las capturas de la pestaña Redes, Administración y Etiquetas del asistente que ya hiciste durante el proceso también puedes incluirlas como `06i`, `06j`, `06k` si quieres más detalle, aunque no son imprescindibles ya que el resultado final se ve en la #7.)*
+![Wizard clásico - Datos básicos con aviso de tamaño](screenshots/18-vm-wizard-clasico-basics-warning.png)
+![Selector de tamaño - confusión con Australia East](screenshots/19-vm-size-picker-australia-confusion.png)
+![Región - búsqueda Austria sin resultados](screenshots/21-region-search-austria-sinresultados.png)
+![Tamaño B2s disponible en France Central](screenshots/22-vm-size-b2s-disponible-francecentral.png)
+![B2s no disponible en France Central](screenshots/23-vm-b2s-no-disponible-francecentral.png)
+![Región - solo 5 recomendadas por el asistente](screenshots/24-region-dropdown-solo-5-recomendadas.png)
+![Tamaño en West Europe - B2s bloqueado, B2s_v2 disponible](screenshots/25-vm-size-westeurope-b2s-bloqueado-b2sv2-ok.png)
+![Wizard - SSH y puertos](screenshots/26-vm-wizard-ssh-puertos.png)
+![Wizard - Discos](screenshots/27-vm-wizard-discos.png)
+![Wizard - Redes](screenshots/28-vm-wizard-redes.png)
+![Wizard - Administración](screenshots/29-vm-wizard-administracion.png)
+![Wizard - Etiquetas](screenshots/30-vm-wizard-etiquetas.png)
+![Revisar y crear - resumen 1](screenshots/31-revisar-crear-resumen1.png)
+![Revisar y crear - resumen 2](screenshots/32-revisar-crear-resumen2.png)
+![Revisar y crear - ERRORES en West Europe](screenshots/33-revisar-crear-errores-westeurope.png)
+![Azure Policy - regiones permitidas](screenshots/34-policy-allowed-regions-parametros.png)
+![Uso y cuotas - familia BS](screenshots/39-uso-cuotas-familia-bs.png)
+![VM creada - vista final](screenshots/41-vm-creada-overview-final.png)
+![Registro de actividad - creación de la VM](screenshots/43-activity-log-creacion-vm.png)
 
 ---
 
@@ -127,7 +138,7 @@ Esta sección documenta por qué la configuración final difiere de la especific
 
 **Primera comprobación (23/09/2026, mañana):** Coste real acumulado = **0,01 €**. Previsión ("Forecast") todavía no disponible por falta de histórico suficiente — es normal, según la práctica los datos de coste tardan entre 8 y 24 horas en consolidarse. Se repetirá la comprobación más avanzado el día.
 
-![Cost Analysis - Resources](screenshots/dia2/10-cost-analysis-resources.png)
+![Cost Analysis - Primera revisión](screenshots/44-cost-analysis-primera-revision.png)
 
 | Recurso | Coste acumulado |
 |---|---|
