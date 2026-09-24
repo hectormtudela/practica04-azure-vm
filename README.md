@@ -136,47 +136,48 @@ Esta sección documenta por qué la configuración final difiere de la especific
 
 ## Sección 8 — Primera revisión en Cost Analysis (Día 2)
 
-**Primera comprobación (23/09/2026, mañana):** Coste real acumulado = **0,01 €**. Previsión ("Forecast") todavía no disponible por falta de histórico suficiente — es normal, según la práctica los datos de coste tardan entre 8 y 24 horas en consolidarse. Se repetirá la comprobación más avanzado el día.
+**Primera comprobación (23/09/2026, mañana):** 0,01 €. **Segunda comprobación (24/09/2026):** 2,27 € — la VM ya lleva un día completo funcionando y el coste ha subido notablemente, como se ve en el pico de la gráfica diaria a partir del 22-23 de septiembre (día de creación).
 
-![Cost Analysis - Primera revisión](screenshots/44-cost-analysis-primera-revision.png)
+![Cost Analysis - Por recurso](screenshots/45-cost-analysis-por-recurso.png)
 
 | Recurso | Coste acumulado |
 |---|---|
-| Máquina virtual | |
-| Disco | |
-| IP pública | |
-| Otros | |
-| **Total (Actual Cost)** | |
+| Máquina virtual | 2,06 € |
+| Disco | 0,09 € |
+| IP pública | 0,12 € |
+| Otros (ancho de banda) | < 0,01 € |
+| **Total (Actual Cost)** | **2,27 €** |
 
-![Cost Analysis - Meter](screenshots/dia2/11-cost-analysis-meter.png)
-![Cost Analysis - Daily](screenshots/dia2/12-cost-analysis-daily.png)
-![Cost Analysis - Tags](screenshots/dia2/13-cost-analysis-tags.png)
-![Forecast](screenshots/dia2/14-forecast.png)
+![Cost Analysis - Por medidor](screenshots/46-cost-analysis-por-medidor.png)
+![Cost Analysis - Diaria](screenshots/47-cost-analysis-diaria.png)
+![Cost Analysis - Por Tag Project](screenshots/48-cost-analysis-por-tag-project.png)
+
+**Verificación por Tags:** al agrupar por Tag → Project, todo el gasto (2,27 €) aparece bajo la etiqueta **"practica04"**, sin ninguna parte como "Untagged" — confirma que el etiquetado de todos los recursos (VM, disco, IP) es correcto.
 
 | Dato | Valor |
 |---|---|
-| Actual Cost | |
-| Forecasted Cost (fin de mes) | |
-| Budget del laboratorio | |
-| ¿Actual supera el Budget? | |
-| ¿Forecast supera el Budget? | |
+| Actual Cost | 2,27 € |
+| Forecasted Cost (fin de mes) | No disponible todavía (Azure muestra "Previsión no disponible" y "€0/día (est.)" — necesita más histórico) |
+| Budget del laboratorio | 3 € |
+| ¿Actual supera el Budget? | No (2,27 € < 3 €), pero ya ha superado el umbral del 50% (1,5 €) |
+| ¿Forecast supera el Budget? | No se puede determinar todavía |
 
-![Alertas recibidas](screenshots/dia2/15-alertas-recibidas.png)
+![Alerta recibida por correo - 50%](screenshots/49-alerta-email-50-porciento.png)
 
 | Alerta | ¿Se ha activado? | Fecha y hora |
 |---|---|---|
-| Actual 50 % | | |
-| Actual 80 % | | |
-| Actual 100 % | | |
-| Forecasted 100 % | | |
+| Actual 50 % | ✅ Sí | 23/09/2026, 23:26 UTC (valor evaluado: 1,58 €) |
+| Actual 80 % | *(pendiente — coste actual 2,27 € aún no llega a 2,40 €)* | |
+| Actual 100 % | *(pendiente)* | |
+| Forecasted 100 % | *(pendiente — Azure aún no calcula previsión)* | |
 
-**¿Se cumplió la predicción de la Sección 5?** _(respuesta)_
+**¿Se cumplió la predicción de la Sección 5?** Parcialmente: se predijo que la alerta **Forecasted** sería la primera en activarse, pero en la práctica ha sido la **Actual 50%** la primera en dispararse, ya que Azure todavía no ha podido calcular una previsión fiable (falta de histórico suficiente en estos primeros días). Es un buen ejemplo de que el comportamiento real de la plataforma no siempre coincide con lo esperado sobre el papel.
 
 ---
 
 ## Sección 9 — Experimento: apagar vs. desasignar
 
-![VM deallocate](screenshots/dia2/16-vm-deallocate.png)
+![VM detenida (desasignada)](screenshots/50-vm-detenida-desasignada.png)
 
 | Medidor | Coste Día 1 | Coste Día 2 | Coste Día 3 |
 |---|---|---|---|
